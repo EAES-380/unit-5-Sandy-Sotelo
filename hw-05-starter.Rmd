@@ -1,7 +1,7 @@
 ---
 title: "Homework 05 - Putting it all together!"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Sandy Sotelo"
+date: "11/13/2025"
 output: html_document
 ---
 
@@ -15,20 +15,57 @@ library(tidyverse)
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
+```{r read-tornado}
+tornado <- read_csv("data/tornado-path.csv")
+
+glimpse(tornado)
+
+```
+
 
 ### Exercise 2
 
-Remove this text, and add your answer for Exercise 2 here.
+```{rr select-tornado}
+tornado <- read_csv("data/tornado-path.csv") %>%
+  select(
+    storm_date, storm_time, state_name,
+    magnitude, fatality_count, length, width
+  )
+```
 
 ### Exercise 3
+```{r write-tornado}
+write_csv(tornado, "data/tornado.csv")
+```
 
-Remove this text, and add your answer for Exercise 3 here.
 
 ### Exercise 4
-
-Remove this text, and add your answer for Exercise 4 here.
+```{r read-fix-magnitude}
+tornado_fixed <- read_csv(
+  "data/tornado.csv",  
+  na = "-9"
+)
+glimpse(tornado_fixed)
+```
 
 ### Exercise 5
+```{r tornado-plot}
+tornado_fixed %>% 
+  filter(state_name %in% c("Kansas", "Oklahoma")) %>% 
+  ggplot(aes(x = storm_time,
+             y = fatality_count,
+             color = state_name,
+             size = width)) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ magnitude) +
+  labs(
+    title = "Tornado fatalities in Kansas and Oklahoma by time of day",
+    x = "Time of day",
+    y = "Number of fatalities",
+    color = "State",
+    size = "Tornado width"
+  ) +
+  theme_minimal()
 
-Remove this text, and add your answer for Exercise 5 here.
+```
+In general, tornadoes with higher magnitudes tend to have higher fatality counts, and many of the larger-fatality events occur later in the day. Most tornadoes cause zero fatalities, and there are relatively few very severe events, so patterns for the highest magnitudes are based on small sample sizes. Reporting issues and missing data also mean these trends should be interpreted with caution.
