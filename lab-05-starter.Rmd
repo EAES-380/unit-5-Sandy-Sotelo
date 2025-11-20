@@ -1,7 +1,7 @@
 ---
 title: "Lab 05 - Importing and Recoding `earthquakes`"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Sandy Sotelo"
+date: "11/19/2025"
 output: html_document
 ---
 
@@ -12,6 +12,7 @@ library(tidyverse)
 library(readxl)
 library(openintro)
 library(skimr)
+library(readr)
 library(janitor)
 ```
 
@@ -19,40 +20,114 @@ library(janitor)
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
+```{r inspect-earthquakes}
+skim(earthquakes)
+```
+The reasons why we were able to view the earthquakes without using the read file is because of the skim function, we are just getting a preview of the earthquakes not necessarily showing all the data.
 
 ### Exercise 2
-
-Remove this text, and add your answer for Exercise 2 here.
-
+```{r import-earthquakes, eval=FALSE}
+earthquakes_1 <- read_csv("data/earthquakes-1.csv")
+earthquakes_2 <- read_tsv("data/earthquakes-2.txt")
+earthquakes_3 <- read_excel("data/earthquakes-3.xlsx")
+```
 ### Exercise 3
-
-Remove this text, and add your answer for Exercise 3 here.
-
+```{r coerce-earthquakes-3, message = F, warning = F}
+earthquakes_3 <- read_xlsx("data/earthquakes-3.xlsx", col_types = c("numeric", 
+                                                                    "text",
+                                                                    "numeric",
+                                                                    "numeric"))
+```
 ### Exercise 4
 
-Remove this text, and add your answer for Exercise 4 here.
+```{r }
+read_csv("data/earthquakes-badnames-na.csv") %>% 
+  glimpse()
+
+```
+
 
 ### Exercise 5
 
-Remove this text, and add your answer for Exercise 5 here.
+```{r}
+earthquakes_joined <- earthquakes_1 %>% 
+  left_join(earthquakes_2, by = c("year", "month", "day")) %>% 
+  left_join(earthquakes_3, by = c("year", "month", "day"))
+
+earthquakes_joined
+```
+
 
 ### Exercise 6
+```{r}
+earthquakes_bad <- read_csv(
+  "data/earthquakes-badnames-na.csv",
+  na = c(".", "NA")
+)
 
-Remove this text, and add your answer for Exercise 6 here.
+```
+
 
 ### Exercise 7
 
-Remove this text, and add your answer for Exercise 7 here.
+```{r}
+earthquakes_bad <- earthquakes_bad %>%
+  clean_names()
+
+glimpse(earthquakes_bad)
+
+```
+
 
 ### Exercise 8
 
-Remove this text, and add your answer for Exercise 8 here.
+```{r}
+earthquakes_bad <- earthquakes_bad %>%
+  clean_names() %>% 
+  mutate(
+    richter = case_when(
+      richter == "seven" ~ "7",   # fix the bad text value
+      TRUE ~ richter             # keep everything else as it is
+    ),
+    richter = as.numeric(richter) # convert entire column to numeric
+  )
 
+glimpse(earthquakes_bad)
+
+```
 ### Exercise 9
+```{r}
+earthquakes_correct <- earthquakes_bad %>%
+  mutate(
+    month = factor(
+      month,
+      levels = c(
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      )
+    )
+  )
 
-Remove this text, and add your answer for Exercise 9 here.
+```
+
+```{r}
+earthquakes_correct %>%
+  count(month)
+
+```
 
 ### Exercise 10
+```{r}
+write_rds(earthquakes_correct, "earthquakes_correct.rds")
+```
 
-Remove this text, and add your answer for Exercise 10 here.
+```{r}
+earthquakes_rds <- readRDS("earthquakes_correct.rds")
+
+```
+
+```{r}
+earthquakes_rds %>%
+  count(month)
+```
+
